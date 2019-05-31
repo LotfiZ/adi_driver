@@ -2,12 +2,12 @@
   <arg name="with_filter" default="true"/>
   <arg name="with_rviz" default="false"/>
   <arg name="with_plot" default="false"/>
-  <arg name="device" default="/dev/ttyACM0"/>
+  <arg name="device" default="/dev/ttyACM1"/>
   <arg name="frame_id" default="imu"/>
   <arg name="burst_read" default="false"/>
   <arg name="publish_temperature" default="false"/>
-  <arg name="rate" default="100"/>
-  <arg name="publish_tf" default="true"/>
+  <arg name="rate" default="20"/>
+  <arg name="publish_tf" default="false"/>
   <arg name="publish_debug_topics" default="false"/>
 
   <param if="$(arg with_rviz)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find adi_driver)/urdf/adis16470_breakout.urdf'" />
@@ -18,10 +18,12 @@
     <param name="burst_mode" value="$(arg burst_read)"/>
     <param name="publish_temperature" value="$(arg publish_temperature)"/>
     <param name="rate" value="$(arg rate)"/>
+    <param name="world_frame" value="enu"/>
   </node>
 
   <node if="$(arg with_filter)"
 	name="imu_filter" pkg="imu_filter_madgwick" type="imu_filter_node">
+    <param name="gain" value="0.01"/>
     <param name="use_mag" value="false"/>
     <param name="publish_tf" value="$(arg publish_tf)"/>
     <param name="publish_debug_topics" value="$(arg publish_debug_topics)"/>
@@ -39,5 +41,5 @@
 
   <!-- Connect sensors before tests -->
   <test test-name="test_adis16470" pkg="adi_driver" type="test_adis16470.py"/>
-  
+      <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="0 0 0 0 0 0 base_link imu 30" />
 </launch>
